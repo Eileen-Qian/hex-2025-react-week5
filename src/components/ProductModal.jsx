@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import axios from "axios";
 const API_BASE = import.meta.env.VITE_API_BASE;
@@ -6,9 +6,10 @@ const API_PATH = import.meta.env.VITE_API_PATH;
 
 function ProductModal({ getProducts, modalType, templateProduct, closeModal }) {
   const [tempData, setTempData] = useState(templateProduct);
-  useEffect(() => {
+    // 使用 useMemo 計算新資料，避免每次渲染都創建新物件
+  const computedData = useMemo(() => {
     const src = templateProduct || {};
-    setTempData({
+    return {
       id: src.id ?? "",
       title: src.title ?? "",
       category: src.category ?? "",
@@ -24,10 +25,15 @@ function ProductModal({ getProducts, modalType, templateProduct, closeModal }) {
           ? [...src.imagesUrl]
           : [""],
       shipping: Array.isArray(src.shipping) ? [...src.shipping] : [],
-    });
-  }, [templateProduct, modalType]);
+    };
+  }, [templateProduct]);
+  // 只在 computedData 改變時更新
+  useEffect(() => {
+    setTempData(computedData);
+  }, [computedData]);
   const handleCopy = async () => {
     await navigator.clipboard.writeText(imageUrl);
+    showAlert("success", "複製成功");
   };
   const handleModalInputChange = (e) => {
     const { name, value, checked, type } = e.target;
@@ -85,8 +91,27 @@ function ProductModal({ getProducts, modalType, templateProduct, closeModal }) {
     });
   };
 
-  const [updateStatus, setUpdateStatus] = useState(null);
-  const [updateMessage, setUpdateMessage] = useState(null);
+  const [alertState, setAlertState] = useState({
+    show: false,
+    type: "success", // success | danger
+    message: "",
+  });
+  const showAlert = (type, message) => {
+    setAlertState({
+      show: true,
+      type,
+      message,
+    });
+
+    setTimeout(() => {
+      setAlertState({
+        show: false,
+        type: "success",
+        message: "",
+      });
+    }, 1500);
+  };
+
   const updateProduct = async (id) => {
     let url = `${API_BASE}/api/${API_PATH}/admin/product`;
     let method = "post";
@@ -109,51 +134,30 @@ function ProductModal({ getProducts, modalType, templateProduct, closeModal }) {
     };
 
     if (!Array.isArray(tempData.shipping) || tempData.shipping.length === 0) {
-      setUpdateStatus(false);
-      setUpdateMessage("請至少選擇一項配送方式");
-      setTimeout(() => {
-        setUpdateStatus(null);
-        setUpdateMessage(null);
-      }, 1500);
+      showAlert("danger", "請至少選擇一項配送方式");
       return;
     }
 
     try {
       const res = await axios[method](url, productData);
-      setUpdateStatus(true);
-      setUpdateMessage(res.data.message);
+      showAlert("success", res.data.message);
       getProducts();
       closeModal();
     } catch (error) {
-      setUpdateStatus(false);
-      setUpdateMessage(error.response?.data?.message || error.message);
-    } finally {
-      setTimeout(() => {
-        setUpdateStatus(null);
-        setUpdateMessage(null);
-      }, 1500);
+      showAlert("danger", error.response?.data?.message || error.message);
     }
   };
 
-  const [deleteStatus, setDeleteStatus] = useState(null);
-  const [deleteMessage, setDeleteMessage] = useState(null);
   const deleteProduct = async (id) => {
     try {
       const res = await axios.delete(
         `${API_BASE}/api/${API_PATH}/admin/product/${id}`,
       );
-      setDeleteStatus(true);
-      setDeleteMessage(res.data.message);
+      showAlert("success", res.data.message);
       getProducts();
       closeModal();
     } catch (error) {
-      setDeleteStatus(false);
-      setDeleteMessage(error.response?.data?.message || error.message);
-    } finally {
-      setTimeout(() => {
-        setDeleteStatus(null);
-        setDeleteMessage(null);
-      }, 1500);
+      showAlert("danger", error.response?.data?.message || error.message);
     }
   };
 
@@ -198,22 +202,22 @@ function ProductModal({ getProducts, modalType, templateProduct, closeModal }) {
   };
   return (
     <>
-      {updateMessage && (
+      {alertState.show && (
         <div
-          className={`alert ${updateStatus ? "alert-success" : "alert-danger"}`}
+          className={`alert alert-${alertState.type} position-fixed`}
+          style={{
+            top: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 2000,
+            minWidth: "300px",
+          }}
           role="alert"
         >
-          {updateMessage}
+          {alertState.message}
         </div>
       )}
-      {deleteMessage && (
-        <div
-          className={`alert ${deleteStatus ? "alert-success" : "alert-danger"}`}
-          role="alert"
-        >
-          {deleteMessage}
-        </div>
-      )}
+
       <div
         id="productModal"
         className="modal fade"

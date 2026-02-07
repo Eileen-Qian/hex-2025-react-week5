@@ -93,11 +93,16 @@ function App() {
 
   const openModal = (type, product) => {
     setModalType(type);
-    setTemplateProduct((pre) => ({
-      ...pre,
-      ...product,
-    }));
+    // 不要每次都解構重建，直接傳遞
+  if (type === "create") {
+    setTemplateProduct(INITIAL_TEMPLATE_DATA);
+  } else {
+    setTemplateProduct(product);
+  }
+  // 延遲開啟 modal，確保 state 更新完成
+  setTimeout(() => {
     productModalRef.current.show();
+  }, 0);
   };
 
   const closeModal = () => {
