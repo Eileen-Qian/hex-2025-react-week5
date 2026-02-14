@@ -8,9 +8,15 @@ import { useNavigate } from "react-router";
 import Pagination from "../..//components/Pagination.jsx";
 
 // 純 API 呼叫，不含 setState，放在元件外部
-const fetchProducts = async (page = 1) => {
-  const res = await axios.get(`${API_BASE}/api/${API_PATH}/products?page=${page}`);
+const fetchProducts = async (page = 1, category = "") => {
+  const url = `${API_BASE}/api/${API_PATH}/products?page=${page}${category ? `&category=${category}` : ""}`;
+  const res = await axios.get(url);
   return res.data;
+};
+
+const fetchAllCategories = async () => {
+  const res = await axios.get(`${API_BASE}/api/${API_PATH}/products/all`);
+  return [...new Set(res.data.products.map((p) => p.category))];
 };
 
 function Products() {
@@ -22,14 +28,20 @@ function Products() {
     has_pre: false,
     has_next: false,
   });
+  const [categories, setCategories] = useState([]);
+  const [currentCategory, setCurrentCategory] = useState("");
 
   // useEffect 內部定義完整的 async 函式，避免 cascading renders
   useEffect(() => {
     const init = async () => {
       try {
-        const data = await fetchProducts();
-        setProducts(data.products);
-        setPagination(data.pagination);
+        const [productData, categoryList] = await Promise.all([
+          fetchProducts(),
+          fetchAllCategories(),
+        ]);
+        setProducts(productData.products);
+        setPagination(productData.pagination);
+        setCategories(categoryList);
       } catch (error) {
         console.error(error);
       }
@@ -38,14 +50,20 @@ function Products() {
   }, []);
 
   // 給 Pagination 和其他事件使用的函式
-  const getProducts = async (page = 1) => {
+  const getProducts = async (page = 1, category = currentCategory) => {
     try {
-      const data = await fetchProducts(page);
+      const data = await fetchProducts(page, category);
       setProducts(data.products);
       setPagination(data.pagination);
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleCategoryChange = (e) => {
+    const category = e.target.value;
+    setCurrentCategory(category);
+    getProducts(1, category);
   };
 
   const goSingleProduct = (id) => {
@@ -68,7 +86,24 @@ function Products() {
 
   return (
     <div className="container">
-      <div className="row mt-5">
+      {/* 分類下拉選單 */}
+      <div className="mt-4">
+        <select
+          className="form-select"
+          style={{ width: "200px" }}
+          value={currentCategory}
+          onChange={handleCategoryChange}
+        >
+          <option value="">全部分類</option>
+          {categories.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="row mt-4">
         {products.map((product) => (
           <div className="col-md-4 mb-3" key={product.id}>
             <div className="card h-100">
@@ -105,7 +140,7 @@ function Products() {
             </div>
           </div>
         ))}
-        <Pagination pagination={pagination} onChangePage={getProducts} />
+        <Pagination pagination={pagination} onChangePage={(page) => getProducts(page)} />
       </div>
     </div>
   );
