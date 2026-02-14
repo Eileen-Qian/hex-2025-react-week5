@@ -123,14 +123,14 @@ function Products() {
                 >
                   <button
                     type="button"
-                    className="btn btn-outline-success"
+                    className="btn btn-outline-primary"
                     onClick={() => goSingleProduct(product.id)}
                   >
                     查看細節
                   </button>
                   <button
                     type="button"
-                    className="btn btn-success"
+                    className="btn btn-primary"
                     onClick={() => addCart(product.id)}
                   >
                     加入購物車

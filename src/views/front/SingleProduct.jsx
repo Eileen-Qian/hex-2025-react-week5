@@ -81,7 +81,7 @@ function SingleProduct() {
 
         {/* 右側產品資訊 */}
         <div className="col-md-6">
-          <span className="badge bg-success mb-2">{product.category}</span>
+          <span className="badge bg-primary mb-2">{product.category}</span>
           <h2>{product.title}</h2>
           <p className="text-muted">{product.content}</p>
           <p>{product.description}</p>
@@ -126,7 +126,7 @@ function SingleProduct() {
 
           <button
             type="button"
-            className="btn btn-success w-100"
+            className="btn btn-primary w-100"
             onClick={() => addCart(product.id, qty)}
           >
             加入購物車
