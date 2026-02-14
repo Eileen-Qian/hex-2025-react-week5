@@ -3,7 +3,7 @@ import { Outlet, NavLink } from "react-router";
 function FrontendLayout() {
   return (
     <>
-      <nav className="navbar navbar-expand-lg bg-body-tertiary">
+      <nav className="navbar navbar-expand-lg bg-body-tertiary fixed-top">
         <div className="container-fluid">
           <NavLink className="navbar-brand" to="/">
             <img src="src/assets/images/BanriLogo 1.svg" alt="Banri" />
@@ -35,7 +35,7 @@ function FrontendLayout() {
           </div>
         </div>
       </nav>
-      <main>
+      <main style={{ paddingTop: "150px" }}>
         <Outlet />
       </main>
     </>
