@@ -80,7 +80,7 @@ function SingleProduct() {
         </div>
 
         {/* 右側產品資訊 */}
-        <div className="col-md-6">
+        <div className="col-md-6 text-start">
           <span className="badge bg-primary mb-2">{product.category}</span>
           <h2>{product.title}</h2>
           <p className="text-muted">{product.content}</p>
@@ -98,7 +98,7 @@ function SingleProduct() {
           <div className="d-flex align-items-center gap-3 mb-3">
             <div className="input-group" style={{ width: "150px" }}>
               <button
-                className="btn btn-outline-secondary"
+                className="btn btn-outline-primary"
                 type="button"
                 onClick={() => setQty((prev) => Math.max(1, prev - 1))}
                 disabled={qty <= 1}
@@ -114,7 +114,7 @@ function SingleProduct() {
                 readOnly
               />
               <button
-                className="btn btn-outline-secondary"
+                className="btn btn-outline-primary"
                 type="button"
                 onClick={() => setQty((prev) => Math.min(10, prev + 1))}
                 disabled={qty >= 10}
