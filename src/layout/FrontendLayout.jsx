@@ -1,12 +1,14 @@
 import { Outlet, NavLink } from "react-router";
 
+import logo from "../assets/images/BanriLogo 1.svg"
+
 function FrontendLayout() {
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-body-tertiary fixed-top">
         <div className="container-fluid">
           <NavLink className="navbar-brand" to="/">
-            <img src="src/assets/images/BanriLogo 1.svg" alt="Banri" />
+            <img src={logo} alt="Banri" />
           </NavLink>
           <button
             className="navbar-toggler"
