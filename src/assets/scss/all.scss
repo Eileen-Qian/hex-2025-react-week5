@@ -34,3 +34,7 @@ img {
 .images {
   height: 150px;
 }
+
+.navbar .nav-link.active {
+  color: $primary !important;
+}
